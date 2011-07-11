@@ -1,7 +1,7 @@
 fs = require 'fs'
 http = require 'http'
 https = require 'https'
-Middleman = require '../lib/middleman'
+MiddleMan = require '../lib/middleman'
 
 describe 'proxying a server', ->
     it 'requests the root directory', ->
@@ -11,7 +11,7 @@ describe 'proxying a server', ->
         server = http.createServer (request, response) ->
             response.end 'Well, hello there.\n'
         server.listen 7357, ->
-            middleman = new Middleman('http://localhost:7357')
+            middleman = new MiddleMan('http://localhost:7357')
             middleman.listen 7358, ->
                 http.get { host: 'localhost', port: 7358, path: '/' }, (response) ->
                     response.setEncoding 'utf8'
@@ -36,7 +36,7 @@ describe 'proxying a server', ->
             requestUrl = request.url
             response.end 'Well, hello there.\n'
         server.listen 7357, ->
-            middleman = new Middleman('http://localhost:7357')
+            middleman = new MiddleMan('http://localhost:7357')
             middleman.listen 7358, ->
                 http.get { host: 'localhost', port: 7358, path: '/p/a/t/h?query=string#hash' }, (response) ->
                     response.setEncoding 'utf8'
@@ -69,7 +69,7 @@ describe 'proxying a server', ->
 
             response.end 'I\'ll get you, wabbit!'
         server.listen 7357, ->
-            middleman = new Middleman('http://localhost:7357')
+            middleman = new MiddleMan('http://localhost:7357')
             middleman.listen 7358, ->
                 options = { method: 'POST', host: 'localhost', port: 7358, path: '/p/a/t/h' }
                 request = http.request options, (response) ->
@@ -102,7 +102,7 @@ describe 'proxying a server', ->
             requestHeaders = request.headers
             response.end 'Well, hello there.\n'
         server.listen 7357, ->
-            middleman = new Middleman('http://localhost:7357')
+            middleman = new MiddleMan('http://localhost:7357')
             middleman.listen 7358, ->
                 options =
                     host: 'localhost'
@@ -147,7 +147,7 @@ describe 'proxying a server', ->
         server = https.createServer options, (request, response) ->
             response.end 'Well, hello there.\n'
         server.listen 7357, ->
-            middleman = new Middleman('https://localhost:7357')
+            middleman = new MiddleMan('https://localhost:7357')
             middleman.listen 7358, ->
                 http.get { host: 'localhost', port: 7358, path: '/p/a/t/h' }, (response) ->
                     response.setEncoding 'utf8'

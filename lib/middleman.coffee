@@ -2,7 +2,7 @@ http = require 'http'
 https = require 'https'
 url = require 'url'
 
-class Middleman
+class MiddleMan
     destination = {}
 
     server = http.createServer (clientRequest, clientResponse) ->
@@ -30,4 +30,4 @@ class Middleman
     close: ->
         server.close()
 
-module.exports = Middleman
+module.exports = MiddleMan
