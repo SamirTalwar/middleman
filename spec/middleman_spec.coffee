@@ -52,3 +52,41 @@ describe 'proxying a server', ->
             finally
                 server.close()
                 middleman.close()
+
+    it 'handles POST requests with bodies', ->
+        requestMethod = undefined
+        requestBody = undefined
+        responseBody = undefined
+
+        middleman = undefined
+        server = http.createServer (request, response) ->
+            requestMethod = request.method
+            body = ''
+            request.on 'data', (chunk) -> body += chunk
+            request.on 'end', -> requestBody = body
+
+            response.end 'I\'ll get you, wabbit!'
+        server.listen 7357, ->
+            middleman = new Middleman('http://localhost:7357')
+            middleman.listen 7358, ->
+                options = { method: 'POST', host: 'localhost', port: 7358, path: '/p/a/t/h' }
+                request = http.request options, (response) ->
+                    response.setEncoding 'utf8'
+                    body = ''
+                    response.on 'data', (chunk) -> body += chunk
+                    response.on 'end', -> responseBody = body
+                request.write 'What\'s up, doc?'
+                request.end()
+
+        waitsFor (-> requestMethod?), 'request method', 1000
+        waitsFor (-> requestBody?), 'request body', 1000
+        waitsFor (-> responseBody?), 'response', 1000
+
+        runs ->
+            try
+                expect(requestMethod).toEqual 'POST'
+                expect(requestBody).toEqual 'What\'s up, doc?'
+                expect(responseBody).toEqual 'I\'ll get you, wabbit!'
+            finally
+                server.close()
+                middleman.close()

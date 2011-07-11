@@ -6,10 +6,18 @@ class Middleman
     port = undefined
 
     server = http.createServer (clientRequest, clientResponse) ->
-        req = http.request { method: 'GET', host: hostname, port: port, path: clientRequest.url }, (serverResponse) ->
+        options =
+            host: hostname
+            port: port
+            method: clientRequest.method
+            path: clientRequest.url
+
+        serverRequest = http.request options, (serverResponse) ->
             serverResponse.on 'data', (chunk) -> clientResponse.write chunk
             serverResponse.on 'end', -> clientResponse.end()
-        req.end()
+
+        clientRequest.on 'data', (chunk) -> serverRequest.write chunk
+        clientRequest.on 'end', -> serverRequest.end()
 
     constructor: (proxiedUrl) ->
         urlParts = url.parse proxiedUrl
