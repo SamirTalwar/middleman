@@ -6,7 +6,7 @@ class Middleman
     port = undefined
 
     server = http.createServer (clientRequest, clientResponse) ->
-        req = http.request { method: 'GET', host: hostname, port: port, path: '/' }, (serverResponse) ->
+        req = http.request { method: 'GET', host: hostname, port: port, path: clientRequest.url }, (serverResponse) ->
             serverResponse.on 'data', (chunk) -> clientResponse.write chunk
             serverResponse.on 'end', -> clientResponse.end()
         req.end()
@@ -18,5 +18,8 @@ class Middleman
 
     listen: (args...) ->
         server.listen args...
+
+    close: ->
+        server.close()
 
 module.exports = Middleman
