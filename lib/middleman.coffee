@@ -1,19 +1,20 @@
 http = require 'http'
+https = require 'https'
 url = require 'url'
 
 class Middleman
-    hostname = undefined
-    port = undefined
+    destination = {}
 
     server = http.createServer (clientRequest, clientResponse) ->
         options =
-            host: hostname
-            port: port
+            host: destination.hostname
+            port: destination.port
             method: clientRequest.method
             path: clientRequest.url
             headers: clientRequest.headers
 
-        serverRequest = http.request options, (serverResponse) ->
+        request = { 'http:': http.request, 'https:': https.request }[destination.protocol]
+        serverRequest = request options, (serverResponse) ->
             serverResponse.on 'data', (chunk) -> clientResponse.write chunk
             serverResponse.on 'end', -> clientResponse.end()
 
@@ -21,9 +22,7 @@ class Middleman
         clientRequest.on 'end', -> serverRequest.end()
 
     constructor: (proxiedUrl) ->
-        urlParts = url.parse proxiedUrl
-        hostname = urlParts.hostname
-        port = urlParts.port
+        destination = url.parse proxiedUrl
 
     listen: (args...) ->
         server.listen args...

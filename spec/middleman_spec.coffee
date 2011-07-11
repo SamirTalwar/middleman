@@ -1,4 +1,6 @@
+fs = require 'fs'
 http = require 'http'
+https = require 'https'
 Middleman = require '../lib/middleman'
 
 describe 'proxying a server', ->
@@ -130,6 +132,32 @@ describe 'proxying a server', ->
                     'accept': 'application/json'
                     'connection': 'close'
                 }
+                expect(responseBody).toEqual 'Well, hello there.\n'
+            finally
+                server.close()
+                middleman.close()
+
+    it 'works over HTTPS', ->
+        responseBody = undefined
+
+        middleman = undefined
+        options =
+            key: fs.readFileSync 'fixtures/keys/key.pem'
+            cert: fs.readFileSync 'fixtures/keys/cert.pem'
+        server = https.createServer options, (request, response) ->
+            response.end 'Well, hello there.\n'
+        server.listen 7357, ->
+            middleman = new Middleman('https://localhost:7357')
+            middleman.listen 7358, ->
+                http.get { host: 'localhost', port: 7358, path: '/p/a/t/h' }, (response) ->
+                    response.setEncoding 'utf8'
+                    body = ''
+                    response.on 'data', (chunk) -> body += chunk
+                    response.on 'end', -> responseBody = body
+
+        waitsFor (-> responseBody?), 'response', 1000
+        runs ->
+            try
                 expect(responseBody).toEqual 'Well, hello there.\n'
             finally
                 server.close()
