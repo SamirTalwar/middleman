@@ -90,3 +90,47 @@ describe 'proxying a server', ->
             finally
                 server.close()
                 middleman.close()
+
+    it 'forwards headers', ->
+        requestHeaders = undefined
+        responseBody = undefined
+
+        middleman = undefined
+        server = http.createServer (request, response) ->
+            requestHeaders = request.headers
+            response.end 'Well, hello there.\n'
+        server.listen 7357, ->
+            middleman = new Middleman('http://localhost:7357')
+            middleman.listen 7358, ->
+                options =
+                    host: 'localhost'
+                    port: 7358
+                    path: '/p/a/t/h'
+                    headers:
+                        'host': 'www.example.com'
+                        'content-type': 'text/plain'
+                        'content-length': '0'
+                        'accept': 'application/json'
+
+                http.get options, (response) ->
+                    response.setEncoding 'utf8'
+                    body = ''
+                    response.on 'data', (chunk) -> body += chunk
+                    response.on 'end', -> responseBody = body
+
+        waitsFor (-> requestHeaders?), 'request URL', 1000
+        waitsFor (-> responseBody?), 'response', 1000
+
+        runs ->
+            try
+                expect(requestHeaders).toEqual {
+                    'host': 'www.example.com'
+                    'content-type': 'text/plain'
+                    'content-length': '0'
+                    'accept': 'application/json'
+                    'connection': 'close'
+                }
+                expect(responseBody).toEqual 'Well, hello there.\n'
+            finally
+                server.close()
+                middleman.close()

@@ -11,6 +11,7 @@ class Middleman
             port: port
             method: clientRequest.method
             path: clientRequest.url
+            headers: clientRequest.headers
 
         serverRequest = http.request options, (serverResponse) ->
             serverResponse.on 'data', (chunk) -> clientResponse.write chunk
