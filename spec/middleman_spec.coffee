@@ -93,7 +93,7 @@ describe 'proxying a server', ->
                 server.close()
                 middleman.close()
 
-    it 'forwards headers', ->
+    it 'forwards headers from the client to the server', ->
         requestHeaders = undefined
         responseBody = undefined
 
@@ -120,7 +120,7 @@ describe 'proxying a server', ->
                     response.on 'data', (chunk) -> body += chunk
                     response.on 'end', -> responseBody = body
 
-        waitsFor (-> requestHeaders?), 'request URL', 1000
+        waitsFor (-> requestHeaders?), 'request headers', 1000
         waitsFor (-> responseBody?), 'response', 1000
 
         runs ->
@@ -133,6 +133,43 @@ describe 'proxying a server', ->
                     'connection': 'close'
                 }
                 expect(responseBody).toEqual 'Well, hello there.\n'
+            finally
+                server.close()
+                middleman.close()
+
+    it 'forwards headers from the server to the client', ->
+        responseStatusCode = undefined
+        responseHeaders = undefined
+
+        middleman = undefined
+        server = http.createServer (request, response) ->
+            response.writeHead '404',
+                'Content-Type': 'text/plain; charset=UTF-8'
+                'Content-Length': '19'
+                'Date': 'Sun, 52 Jan 2096 25:00:00 XST'
+                'Expires': '-1'
+
+            response.end 'Well, hello there.\n'
+        server.listen 7357, ->
+            middleman = new MiddleMan('http://localhost:7357')
+            middleman.listen 7358, ->
+                http.get { host: 'localhost', port: 7358, path: '/p/a/t/h' }, (response) ->
+                    responseStatusCode = response.statusCode
+                    responseHeaders = response.headers
+
+        waitsFor (-> responseStatusCode?), 'response status code', 1000
+        waitsFor (-> responseHeaders?), 'response headers', 1000
+
+        runs ->
+            try
+                expect(responseStatusCode).toEqual 404
+                expect(responseHeaders).toEqual {
+                    'content-type': 'text/plain; charset=UTF-8'
+                    'content-length': '19'
+                    'date': 'Sun, 52 Jan 2096 25:00:00 XST'
+                    'expires': '-1'
+                    'connection': 'close'
+                }
             finally
                 server.close()
                 middleman.close()

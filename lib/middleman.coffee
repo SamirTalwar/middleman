@@ -1,3 +1,5 @@
+#!/usr/bin/env coffee
+
 http = require 'http'
 https = require 'https'
 url = require 'url'
@@ -15,6 +17,7 @@ class MiddleMan
 
         request = { 'http:': http.request, 'https:': https.request }[destination.protocol]
         serverRequest = request options, (serverResponse) ->
+            clientResponse.writeHead serverResponse.statusCode, serverResponse.headers
             serverResponse.on 'data', (chunk) -> clientResponse.write chunk
             serverResponse.on 'end', -> clientResponse.end()
 
