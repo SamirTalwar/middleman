@@ -34,4 +34,8 @@ class MiddleMan
     close: ->
         server.close()
 
-module.exports = MiddleMan
+if module != require.main
+    module.exports = MiddleMan
+    return
+
+new MiddleMan(process.argv[2]).listen(7769)
