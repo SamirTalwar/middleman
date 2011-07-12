@@ -109,7 +109,7 @@ describe 'proxying a server', ->
                     port: 7358
                     path: '/p/a/t/h'
                     headers:
-                        'host': 'www.example.com'
+                        'host': 'www.example.com' # this will be thrown away
                         'content-type': 'text/plain'
                         'content-length': '0'
                         'accept': 'application/json'
@@ -126,7 +126,7 @@ describe 'proxying a server', ->
         runs ->
             try
                 expect(requestHeaders).toEqual {
-                    'host': 'www.example.com'
+                    'host': 'localhost' # this is reset by the proxy
                     'content-type': 'text/plain'
                     'content-length': '0'
                     'accept': 'application/json'

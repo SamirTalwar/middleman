@@ -14,6 +14,7 @@ class MiddleMan
             method: clientRequest.method
             path: clientRequest.url
             headers: clientRequest.headers
+        options.headers.host = destination.hostname
 
         request = { 'http:': http.request, 'https:': https.request }[destination.protocol]
         serverRequest = request options, (serverResponse) ->
