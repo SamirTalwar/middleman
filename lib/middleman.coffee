@@ -31,6 +31,9 @@ class MiddleMan
     listen: (args...) ->
         server.listen args...
 
+    on: (args...) ->
+        server.on args...
+
     close: ->
         server.close()
 

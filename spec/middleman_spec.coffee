@@ -4,10 +4,31 @@ https = require 'https'
 MiddleMan = require '../lib/middleman'
 
 describe 'proxying a server', ->
+    server = undefined
+    middleman = undefined
+
+    beforeEach ->
+        server = undefined
+        middleman = undefined
+
+    afterEach ->
+        serverClosed = not server?
+        middlemanClosed = not middleman?
+
+        if not serverClosed
+            server.on 'close', -> serverClosed = true
+            server.close()
+
+        if not middlemanClosed
+            middleman.on 'close', -> middlemanClosed = true
+            middleman.close()
+
+        waitsFor (-> serverClosed), 'server to close'
+        waitsFor (-> middlemanClosed), 'middleman to close'
+
     it 'requests the root directory', ->
         responseBody = undefined
 
-        middleman = undefined
         server = http.createServer (request, response) ->
             response.end 'Well, hello there.\n'
         server.listen 7357, ->
@@ -21,17 +42,12 @@ describe 'proxying a server', ->
 
         waitsFor (-> responseBody?), 'response', 1000
         runs ->
-            try
-                expect(responseBody).toEqual 'Well, hello there.\n'
-            finally
-                server.close()
-                middleman.close()
+            expect(responseBody).toEqual 'Well, hello there.\n'
 
     it 'requests the given path', ->
         requestUrl = undefined
         responseBody = undefined
 
-        middleman = undefined
         server = http.createServer (request, response) ->
             requestUrl = request.url
             response.end 'Well, hello there.\n'
@@ -48,19 +64,14 @@ describe 'proxying a server', ->
         waitsFor (-> responseBody?), 'response', 1000
 
         runs ->
-            try
-                expect(requestUrl).toEqual '/p/a/t/h?query=string#hash'
-                expect(responseBody).toEqual 'Well, hello there.\n'
-            finally
-                server.close()
-                middleman.close()
+            expect(requestUrl).toEqual '/p/a/t/h?query=string#hash'
+            expect(responseBody).toEqual 'Well, hello there.\n'
 
     it 'handles POST requests with bodies', ->
         requestMethod = undefined
         requestBody = undefined
         responseBody = undefined
 
-        middleman = undefined
         server = http.createServer (request, response) ->
             requestMethod = request.method
             body = ''
@@ -85,19 +96,14 @@ describe 'proxying a server', ->
         waitsFor (-> responseBody?), 'response', 1000
 
         runs ->
-            try
-                expect(requestMethod).toEqual 'POST'
-                expect(requestBody).toEqual 'What\'s up, doc?'
-                expect(responseBody).toEqual 'I\'ll get you, wabbit!'
-            finally
-                server.close()
-                middleman.close()
+            expect(requestMethod).toEqual 'POST'
+            expect(requestBody).toEqual 'What\'s up, doc?'
+            expect(responseBody).toEqual 'I\'ll get you, wabbit!'
 
     it 'forwards headers from the client to the server', ->
         requestHeaders = undefined
         responseBody = undefined
 
-        middleman = undefined
         server = http.createServer (request, response) ->
             requestHeaders = request.headers
             response.end 'Well, hello there.\n'
@@ -124,24 +130,19 @@ describe 'proxying a server', ->
         waitsFor (-> responseBody?), 'response', 1000
 
         runs ->
-            try
-                expect(requestHeaders).toEqual {
-                    'host': 'localhost' # this is reset by the proxy
-                    'content-type': 'text/plain'
-                    'content-length': '0'
-                    'accept': 'application/json'
-                    'connection': 'close'
-                }
-                expect(responseBody).toEqual 'Well, hello there.\n'
-            finally
-                server.close()
-                middleman.close()
+            expect(requestHeaders).toEqual {
+                'host': 'localhost' # this is reset by the proxy
+                'content-type': 'text/plain'
+                'content-length': '0'
+                'accept': 'application/json'
+                'connection': 'close'
+            }
+            expect(responseBody).toEqual 'Well, hello there.\n'
 
     it 'forwards headers from the server to the client', ->
         responseStatusCode = undefined
         responseHeaders = undefined
 
-        middleman = undefined
         server = http.createServer (request, response) ->
             response.writeHead '404',
                 'Content-Type': 'text/plain; charset=UTF-8'
@@ -161,23 +162,18 @@ describe 'proxying a server', ->
         waitsFor (-> responseHeaders?), 'response headers', 1000
 
         runs ->
-            try
-                expect(responseStatusCode).toEqual 404
-                expect(responseHeaders).toEqual {
-                    'content-type': 'text/plain; charset=UTF-8'
-                    'content-length': '19'
-                    'date': 'Sun, 52 Jan 2096 25:00:00 XST'
-                    'expires': '-1'
-                    'connection': 'close'
-                }
-            finally
-                server.close()
-                middleman.close()
+            expect(responseStatusCode).toEqual 404
+            expect(responseHeaders).toEqual {
+                'content-type': 'text/plain; charset=UTF-8'
+                'content-length': '19'
+                'date': 'Sun, 52 Jan 2096 25:00:00 XST'
+                'expires': '-1'
+                'connection': 'close'
+            }
 
     it 'works over HTTPS', ->
         responseBody = undefined
 
-        middleman = undefined
         options =
             key: fs.readFileSync 'fixtures/keys/key.pem'
             cert: fs.readFileSync 'fixtures/keys/cert.pem'
@@ -194,8 +190,4 @@ describe 'proxying a server', ->
 
         waitsFor (-> responseBody?), 'response', 1000
         runs ->
-            try
-                expect(responseBody).toEqual 'Well, hello there.\n'
-            finally
-                server.close()
-                middleman.close()
+            expect(responseBody).toEqual 'Well, hello there.\n'
