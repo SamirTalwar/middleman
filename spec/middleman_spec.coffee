@@ -17,14 +17,20 @@ describe 'proxying a server', ->
 
         if not serverClosed
             server.on 'close', -> serverClosed = true
-            server.close()
+            try
+                server.close()
+            catch e
+                serverClosed = true
 
         if not middlemanClosed
             middleman.on 'close', -> middlemanClosed = true
-            middleman.close()
+            try
+                middleman.close()
+            catch e
+                middlemanClosed = true
 
-        waitsFor (-> serverClosed), 'server to close'
-        waitsFor (-> middlemanClosed), 'middleman to close'
+        waitsFor (-> serverClosed), 'server to close', 1000
+        waitsFor (-> middlemanClosed), 'middleman to close', 1000
 
     it 'requests the root directory', ->
         responseBody = undefined
