@@ -23,9 +23,8 @@ describe 'proxying a server', ->
                 serverClosed = true
 
         if not middlemanClosed
-            middleman.on 'close', -> middlemanClosed = true
             try
-                middleman.close()
+                middleman.close -> middlemanClosed = true
             catch e
                 middlemanClosed = true
 

@@ -31,10 +31,8 @@ class MiddleMan
     listen: (args...) ->
         server.listen args...
 
-    on: (args...) ->
-        server.on args...
-
-    close: ->
+    close: (callback) ->
+        server.on 'close', callback
         server.close()
 
 if module != require.main
