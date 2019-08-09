@@ -14,7 +14,7 @@ For example, to proxy Google's encrypted domain:
 
     ./index.js https://encrypted.google.com/
 
-You can then connect to the server on `http://localhost:8080/`.
+You can then connect to the server on [http://localhost:8080/]().
 
 You can optionally specify a port. The following command runs the proxy on port 5000:
 
