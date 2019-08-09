@@ -1,9 +1,9 @@
 {
-  "name": "Middleman",
+  "name": "MiddleMan",
   "version": "1.0.0",
   "description": "An HTTP-to-HTTPS proxy.",
   "main": "index.js",
-  "repository": "git@github.com:SamirTalwar/Middleman.git",
+  "repository": "git@github.com:SamirTalwar/MiddleMan.git",
   "author": "Samir Talwar <samir@noodlesandwich.com>",
   "license": "MIT",
   "bin": {
