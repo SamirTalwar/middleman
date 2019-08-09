@@ -1,0 +1,12 @@
+{
+  "name": "Middleman",
+  "version": "1.0.0",
+  "description": "An HTTP-to-HTTPS proxy.",
+  "main": "lib/middleman.coffee",
+  "repository": "git@github.com:SamirTalwar/Middleman.git",
+  "author": "Samir Talwar <samir@noodlesandwich.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "coffeescript": "^2.4.1"
+  }
+}
