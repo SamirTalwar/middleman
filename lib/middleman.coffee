@@ -4,6 +4,8 @@ http = require 'http'
 https = require 'https'
 url = require 'url'
 
+PORT = 8080
+
 class MiddleMan
     destination = {}
 
@@ -27,6 +29,8 @@ class MiddleMan
 
     constructor: (proxiedUrl) ->
         destination = url.parse proxiedUrl
+        unless destination.protocol and destination.hostname
+            throw new Error("Invalid destination: #{destination.href}")
 
     listen: (args...) ->
         server.listen args...
@@ -39,4 +43,10 @@ if module != require.main
     module.exports = MiddleMan
     return
 
-new MiddleMan(process.argv[2]).listen(7769)
+if process.argv.length < 3
+  process.stderr.write "Usage: #{process.argv[1]} URL [PORT]\n"
+  process.exit 2
+
+port = if process.argv[3] then parseInt(process.argv[3]) else PORT
+middleman = new MiddleMan(process.argv[2])
+middleman.listen(port)
