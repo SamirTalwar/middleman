@@ -10,9 +10,12 @@
     "middleman": "index.js"
   },
   "scripts": {
-    "start": "./index.js"
+    "start": "./index.js",
+    "test": "ava"
   },
   "devDependencies": {
-    "prettier": "^1.18.2"
+    "ava": "^2.2.0",
+    "prettier": "^1.18.2",
+    "supertest": "^4.0.2"
   }
 }
